@@ -1,0 +1,44 @@
+import nltk
+from nltk import ngrams
+import string
+from nltk.stem import PorterStemmer
+text=input("enter text here")
+n=int(input("enter n here"))
+#tokenizing
+words=[]
+words = text.split()
+
+#text cleaning
+for word in words:
+    if (word in string.punctuation):
+        words.remove(word)
+
+#text noramlization
+for i in range(len(words)):
+    if (words[i] in string.punctuation):
+        words[i]=words[i].lower()
+        
+print("text clean=",words)
+
+#clean numbers
+for i in range(1,len(words)-1);:
+    if (words[i+1]==')' and words[i+1]=='('):
+        words.remove(words[i+1])
+        words.remove(words[i])
+        words.remove(words[i-1])
+#for i in range()
+#stemming
+stem = nltk.PorterStemmer()
+print("words=",words)
+stemmed = [stem.stem(i) for i in words]
+             
+print("stemmed=",stemmed)
+
+#make ngram
+ngram = list(ngrams(stemmed, n))
+
+#frequency analysis
+print(ngram)
+fdist = nltk.FreqDist(ngram)
+for k,v in fdist.items():
+    print(k,v)
