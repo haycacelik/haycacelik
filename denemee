@@ -1,0 +1,171 @@
+import nltk
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt# Aşağıdaki kodu tek seferliğine çalıştırınız
+from nltk.corpus import wordnet
+import numpy as np
+from nltk.tokenize import word_tokenize
+from collections import defaultdict
+
+#nltk.download('averaged_perceptron_tagger')
+#nltk.download('words')
+#nltk.download('punkt')
+#nltk.download('stopwords')
+#nltk.download('wordnet')
+#nltk.download('omw-1.4')
+# dosya yolu/adı
+
+def get_wordnet_pos(word):
+ """Map POS tag to first character lemmatize() accepts"""
+ tag = nltk.pos_tag([word])[0][1][0].upper()
+ tag_dict = {"J": wordnet.ADJ,
+             "N": wordnet.NOUN,
+             "V": wordnet.VERB,
+             "R": wordnet.ADV}
+
+ return tag_dict.get(tag, wordnet.NOUN)
+
+string_2_text = """Many data mining technologies are available , from single algorithm solutions to complete tool suites . Most of 
+these technologies , however , are used in a desktop environment where little data is captured and maintained . 
+Therefore , most data mining tools are used to analyze small data samples , which were gathered from various 
+sources into proprietary data structures or flat files . On the other hand , organizations are beginning to amass very 
+large databases and end-users are asking more complex questions requiring access to these large databases .
+"""
+string_text ="""Patent analyses based on structured information such as filing dates, assignees, or citations 
+have been the major approaches in practice and in the literature for years [11-14]. These 
+structured data can be analyzed by bibliometric methods, data mining techniques, or wellestablished database management tools such as OLAP (On-Line Analytical Processing) modules. 
+Recently, there has been an interest in applying text mining techniques to assist the task of patent
+analysis and patent mapping [15-19]. A well-utilization of the full texts in the patent documents 
+may complement the interpretations derived from the bibliometric analysis.
+Therefore, based on the patent analysis scenario introduced above, a text mining 
+methodology specialized for full-text patent analysis is proposed and shown in Figure 2. First,
+full patent documents relevant to the analysis purpose are collected. This may involve a repeated 
+process of devising a set of query terms (query formulation), searching a couple of patent 
+databases (collection selection), filtering undesired patents (relevance judgment), and 
+downloading patents for local analysis (data crawling). 
+"""
+sentences = []
+vocab = []
+
+# Tokenların ayrışması
+words_list = nltk.tokenize.word_tokenize(string_text, language="english")
+print(words_list[:10])
+print(len(words_list) , "tokenlere ayrıştırılması", sep="---")
+print("************************************************************************************************************")
+
+
+#######################################################################################################
+
+
+#sayı, işaret gibi şeyler kaldırıldı,sadece keliemeler seçildi.
+words_list = [word.lower() for word in words_list if word.isalpha()] # lower listeden çıkarır,isalpha karakter mi değil mi onu sınar
+print(words_list[:50] )
+print(len(words_list) , "kelime olmayanlar çıkarıldı", sep="---" )
+print("************************************************************************************************************")
+
+
+#######################################################################################################
+
+
+# stopwords
+stop_words = set(nltk.corpus.stopwords.words('english'))
+words_list = [word for word in words_list if not word in stop_words]
+print(words_list[:50])
+print(len(words_list), "stopwordsler kaldırıldı", sep="---")
+print("************************************************************************************************************")
+
+
+#######################################################################################################
+
+
+#ing,ed,s,ies gibi ekler kaldırılıp kelime köleri belirlendi.
+wn_lemma = nltk.WordNetLemmatizer()
+words_list = [wn_lemma.lemmatize(w, get_wordnet_pos(w)) for w in (words_list)]
+print(words_list[:50])
+print(len(words_list), "lemmanization", sep="---")
+print("************************************************************************************************************")
+#(Burada farklı bir yöntem kullanıldı.Yukarıdaki fonksiyona gidip isim yüklem nesne gibi özellikleri alındı. ama nasıl??)
+
+
+#######################################################################################################
+
+
+# ingilizce kelimeler seçilir. bu olmayabilir bibliometrici almamış mesela burda
+check_words = nltk.corpus.words.words()
+words_list = [word for word in words_list if word in check_words]
+print(words_list[:50])
+print(len(words_list), "ingilizce kelimler seçildi", sep="---")
+print("************************************************************************************************************")
+
+
+#######################################################################################################
+
+
+# SET kelimleri tekilleştirir
+print(words_list[:50])
+print(len(set(words_list)), "kelimeler tekilleştirildi", sep="---")
+print("************************************************************************************************************")
+
+
+for word in words_list:  #wordlist içini kontrol edip aynı değilse vocab adlı değişkene atıyor.
+    if word not in vocab:
+        vocab.append(word)
+
+index_word = {}
+i = 0
+for word in vocab:
+    index_word[word] = i
+    i += 1
+
+
+
+print(vocab , str("denemevocab"),sep="---")
+print(len(set(vocab)), "aynı kelimeler yazdırılmadı", sep="---")
+len_vector =len(vocab)
+
+def bag_of_words(sent):
+    count_dict = defaultdict(int)
+    vec = np.zeros(len_vector) # matris oluşturur.
+    for item in sent:
+        count_dict[item] += 1
+    for key,item in count_dict.items():
+        vec[index_word[key]] = item
+    return vec
+
+
+vector = bag_of_words(words_list)
+
+
+print(vector,str("--son"))
+print("**********************buraya kadar vektör içine aldı ayrıştırıp *************")
+print(" ")
+print(" ")
+
+print("********************** bruadan sonra aynılarını dict şeklinde gösterdi *************")
+count =0;
+
+a = dict ={}
+
+
+for i in range(0,len(words_list)):
+    for j in range(0,len(words_list)):
+        if (words_list[i] == words_list[j]):
+            count = count + 1
+    if (count>=1):
+        a[words_list[i]] =  count
+        count =0
+    else:
+        count =0
+
+print(a)
+
+
+
+#######################################################################################################
+
+
+#şekil şukul
+wordcloud = WordCloud(width=1000, height=500, regexp=r"\w[\w' ]+").generate("+".join(vocab))
+plt.figure(figsize=(15,8))
+plt.imshow(wordcloud)
+plt.axis("off")
+plt.show()
