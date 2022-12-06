@@ -1,0 +1,71 @@
+import nltk
+from nltk import ngrams
+from nltk import tokenize
+import string
+from nltk.corpus import wordnet
+from operator import itemgetter
+
+def get_wordnet_pos(word):
+    tag = nltk.pos_tag([word])[0][1][0].upper()
+    tag_dict = {"J": wordnet.ADJ,
+                "N": wordnet.NOUN,
+                "V": wordnet.VERB,
+                "R": wordnet.ADV}
+    return tag_dict.get(tag, wordnet.NOUN)
+
+def add_to_list(list,items):
+    i=0
+    for k,v in items:
+        list[i][0]=int(v)
+        list[i][1]=k 
+        i+=1
+    list=sorted(list, key=itemgetter(0),reverse=True)
+    return list    
+        
+def write_to_file(list,file):
+    for a,b in list:
+        file.write(str(a))
+        file.write(" ")
+        file.write(b)
+        file.write("\n")
+    file.close()    
+def remove_capital(words):
+    for i in range (len(words)):
+        if words[i].isupper:
+            words[i]=words[i].lower()
+
+def split_to_sentences(patent):
+    return tokenize.sent_tokenize(patent)   
+
+def split_to_words(text):
+    return tokenize.word_tokenize(text)
+
+def remove_punctuation(text):
+    return text.translate(str.maketrans('', '', string.punctuation))
+
+def simplifying_words(words):
+    lemmatizer = nltk.WordNetLemmatizer()
+    return[lemmatizer.lemmatize(w, get_wordnet_pos(w)) for w in words]
+    
+def remove_stop_words(words):
+    with open("./eng_stop_words.txt") as t:
+        stop_words = t.read().splitlines()
+    return [w for w in words if not w in stop_words and not w.isdigit() ]
+def make_n_grams(words,n,patents,patentid):
+    while(n>1):
+        ngram = list(ngrams(words, n))     
+        file_write=open("./written/" + patents[patentid]+ str(n) + ".txt",'a+')
+        for elem in ngram:
+                for word in elem:
+                    file_write.write(word)
+                    if(word != elem[-1]):
+                        file_write.write(" ")
+                file_write.write("\n")    
+        file_write.close()
+        n=n-1
+    file_write=open("./written/"+patents[patentid]+"1.txt",'a+')    
+    for word in words:
+        file_write.write(word)
+        file_write.write("\n")
+    file_write.close()
+    
