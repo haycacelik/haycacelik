@@ -1,0 +1,27 @@
+import csv, os
+from functions import *
+
+
+file_write=[] 
+patents = os.listdir("./patents/")
+print(patents)
+for patent in patents:
+    print(patent)
+    file=open("./patents/"+patent,'r')
+    text=file.read()
+    n=4
+    
+    text=remove_punctuation(text)
+    
+    words= split_to_words(text)
+    
+    remove_capital(words)
+
+    words=simplifying_words(words)
+    
+    words=remove_stop_words(words)
+    
+    write =open("./csv/1.csv", 'a+')
+    writer = csv.writer(write)
+    writer.writerow(words)
+    write.close()
