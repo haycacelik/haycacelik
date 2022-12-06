@@ -1,5 +1,6 @@
 import nltk, os
 from nltk import ngrams
+from nltk import tokenize
 import string
 from nltk.corpus import wordnet
 from operator import itemgetter
@@ -11,13 +12,14 @@ def get_wordnet_pos(word):
                 "V": wordnet.VERB,
                 "R": wordnet.ADV}
     return tag_dict.get(tag, wordnet.NOUN)
+
 def add_to_list(list,items):
     i=0
     for k,v in items:
         list[i][0]=int(v)
         list[i][1]=k 
         i+=1
-    list=sorted(list, key=itemgetter(0))
+    list=sorted(list, key=itemgetter(0),reverse=True)
     return list    
         
 def write_to_file(list,file):
@@ -108,6 +110,10 @@ list1=[[None]*2for i in range(len(fdist))]
 file=open("./frequency/f4.txt",'w+')  
 list1=add_to_list(list1,fdist.items())
 write_to_file(list1,file)
+
+
+
+
 
 
 
